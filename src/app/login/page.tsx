@@ -94,7 +94,7 @@ function LoginContent() {
       <main className="flex-1 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">登录 GitHub Global</CardTitle>
+            <CardTitle className="text-2xl">登录 RepoLingo</CardTitle>
             <CardDescription>
               使用 GitHub 账号登录，开始翻译你的项目文档
             </CardDescription>

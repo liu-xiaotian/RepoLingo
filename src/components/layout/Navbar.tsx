@@ -44,7 +44,7 @@ export function Navbar({ user }: NavbarProps) {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <Globe className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">GitHub Global</span>
+            <span className="text-xl font-bold">RepoLingo</span>
           </Link>
 
           {/* Desktop Navigation */}
