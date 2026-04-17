@@ -22,7 +22,7 @@ model apikey {
 }
 
 model repoconfig {
-  id                String     @id
+  id                String     @id @default(cuid()) // 自动生成唯一 id
   repositoryId      String     @unique(map: "RepoConfig_repositoryId_key")
   baseLanguage      String     @default("zh-CN")
   targetLanguages   Json
@@ -33,12 +33,12 @@ model repoconfig {
   autoTranslate     Boolean    @default(false)
   webhookId         Int?
   createdAt         DateTime   @default(now())
-  updatedAt         DateTime
+  updatedAt         DateTime   @updatedAt // 自动更新更新时间
   repository        repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade, map: "RepoConfig_repositoryId_fkey")
 }
 
 model repository {
-  id              String            @id
+  id              String            @id @default(uuid()) // 自动生成 UUID
   userId          String
   githubRepoId    Int               @unique(map: "Repository_githubRepoId_key")
   owner           String
@@ -49,7 +49,7 @@ model repository {
   isPrivate       Boolean           @default(false)
   lastSyncedAt    DateTime?
   createdAt       DateTime          @default(now())
-  updatedAt       DateTime
+  updatedAt       DateTime          @updatedAt // 自动更新时间
   repoconfig      repoconfig?
   user            user              @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Repository_userId_fkey")
   translationtask translationtask[]
