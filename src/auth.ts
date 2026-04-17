@@ -22,7 +22,7 @@ if (process.env.NODE_ENV === "development") {
 export const { handlers, signIn, signOut, auth } = NextAuth({
   // AUTH_SECRET 会自动从环境变量读取，但为了兼容 NEXTAUTH_SECRET 也手动设置
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
-  trustHost: true, // 开发环境需要
+  // trustHost: true, // 开发环境需要
   providers: [
     GitHub({
       clientId: githubClientId!,
