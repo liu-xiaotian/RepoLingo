@@ -385,7 +385,7 @@ export default function SetupPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">
-                GitHub Global 使用 GitHub App 来访问你的仓库。相比传统的 OAuth
+                RepoLingo 使用 GitHub App 来访问你的仓库。相比传统的 OAuth
                 授权，GitHub App 提供：
               </p>
               <ul className="space-y-2 text-sm">
