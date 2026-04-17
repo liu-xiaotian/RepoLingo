@@ -1,3 +1,6 @@
-import { handlers } from "@/auth";
-// 从 auth 模块复用 GET/POST 请求处理函数，并导出给 Next.js App Router 调用
-export const { GET, POST } = handlers;
+import NextAuth from "next-auth";
+import { authOptions } from "@/auth"; // 注意：这里 auth.ts 需要只导出 authOptions
+
+const handler = NextAuth(authOptions);
+
+export { handler as GET, handler as POST };
