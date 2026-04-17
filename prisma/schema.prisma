@@ -3,10 +3,12 @@
 
 generator client {
   provider = "prisma-client"
+  output   = "../src/generated" // 相对于 prisma 文件夹
 }
 
 datasource db {
   provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 // 用户表
