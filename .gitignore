@@ -42,3 +42,6 @@ next-env.d.ts
 
 # Prisma Client
 /src/generated/
+
+# Private keys
+private-key.pem
