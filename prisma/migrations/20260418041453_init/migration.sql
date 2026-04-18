@@ -14,7 +14,7 @@ CREATE TABLE `apikey` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `repoconfig` (
+CREATE TABLE `repoConfig` (
     `id` VARCHAR(191) NOT NULL,
     `repositoryId` VARCHAR(191) NOT NULL,
     `baseLanguage` VARCHAR(191) NOT NULL DEFAULT 'zh-CN',
@@ -150,7 +150,7 @@ CREATE TABLE `userusage` (
 ALTER TABLE `apikey` ADD CONSTRAINT `ApiKey_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `repoconfig` ADD CONSTRAINT `RepoConfig_repositoryId_fkey` FOREIGN KEY (`repositoryId`) REFERENCES `repository`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `repoConfig` ADD CONSTRAINT `RepoConfig_repositoryId_fkey` FOREIGN KEY (`repositoryId`) REFERENCES `repository`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `repository` ADD CONSTRAINT `Repository_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

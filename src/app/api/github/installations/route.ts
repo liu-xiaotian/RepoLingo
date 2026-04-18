@@ -1,23 +1,16 @@
 // GitHub App Installations API
 
 import { NextRequest, NextResponse } from "next/server";
-import { authOptions } from "@/auth";
+import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { decrypt } from "@/lib/crypto";
 import { getUserOctokit } from "@/lib/github/client";
-import { getServerSession } from "next-auth/next"; // 这里必须是 next-auth/next
 /**
  * GET /api/github/installations - 获取用户的 GitHub App 安装列表
  */
 export async function GET(request: NextRequest) {
   try {
-    const session = (await getServerSession(authOptions)) as {
-      user: {
-        id: string;
-        name?: string;
-        email?: string;
-      };
-    };
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

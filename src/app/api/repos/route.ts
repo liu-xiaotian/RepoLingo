@@ -1,26 +1,18 @@
 // 仓库管理 API - 列表和导入
 
 import { NextRequest, NextResponse } from "next/server";
-import { authOptions } from "@/auth";
+import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-
 import { getUserOctokit } from "@/lib/github/client";
 import { getRepository } from "@/lib/github/operations";
 import { decrypt } from "@/lib/crypto";
-import { getServerSession } from "next-auth/next"; // 这里必须是 next-auth/next
 
 /**
  * GET /api/repos - 获取用户仓库列表
  */
 export async function GET(request: NextRequest) {
   try {
-    const session = (await getServerSession(authOptions)) as {
-      user: {
-        id: string;
-        name?: string;
-        email?: string;
-      };
-    };
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -28,7 +20,7 @@ export async function GET(request: NextRequest) {
     const repos = await prisma.repository.findMany({
       where: { userId: session.user.id },
       include: {
-        repoconfig: true,
+        config: true,
         translationTasks: {
           orderBy: { createdAt: "desc" },
           take: 1,
@@ -52,13 +44,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = (await getServerSession(authOptions)) as {
-      user: {
-        id: string;
-        name?: string;
-        email?: string;
-      };
-    };
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -127,7 +113,7 @@ export async function POST(request: NextRequest) {
     });
 
     // 创建默认配置
-    await prisma.repoconfig.create({
+    await prisma.repoConfig.create({
       data: {
         repositoryId: repository.id,
         baseLanguage: "zh-CN",
