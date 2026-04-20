@@ -1,168 +1,214 @@
--- CreateTable
-CREATE TABLE `apikey` (
-    `id` VARCHAR(191) NOT NULL,
-    `userId` VARCHAR(191) NOT NULL,
-    `provider` VARCHAR(191) NOT NULL DEFAULT 'openrouter',
-    `encryptedKey` TEXT NOT NULL,
-    `isActive` BOOLEAN NOT NULL DEFAULT true,
-    `defaultModel` VARCHAR(191) NULL,
-    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL,
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "public";
 
-    INDEX `ApiKey_userId_idx`(`userId`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- CreateEnum
+CREATE TYPE "TranslationStatus" AS ENUM ('PENDING', 'RUNNING', 'COMPLETED', 'FAILED', 'CANCELLED');
+
+-- CreateEnum
+CREATE TYPE "TaskType" AS ENUM ('FULL', 'INCREMENTAL');
+
+-- CreateEnum
+CREATE TYPE "FileStatus" AS ENUM ('PENDING', 'TRANSLATING', 'COMPLETED', 'FAILED', 'SKIPPED');
 
 -- CreateTable
-CREATE TABLE `repoConfig` (
-    `id` VARCHAR(191) NOT NULL,
-    `repositoryId` VARCHAR(191) NOT NULL,
-    `baseLanguage` VARCHAR(191) NOT NULL DEFAULT 'zh-CN',
-    `targetLanguages` JSON NOT NULL,
-    `includePaths` JSON NULL,
-    `excludePaths` JSON NULL,
-    `translationBranch` VARCHAR(191) NOT NULL DEFAULT 'translations',
-    `aiModel` VARCHAR(191) NULL,
-    `autoTranslate` BOOLEAN NOT NULL DEFAULT false,
-    `webhookId` INTEGER NULL,
-    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL,
+CREATE TABLE "User" (
+    "id" TEXT NOT NULL,
+    "githubId" INTEGER NOT NULL,
+    "login" TEXT NOT NULL,
+    "name" TEXT,
+    "email" TEXT,
+    "avatarUrl" TEXT,
+    "accessToken" TEXT NOT NULL,
+    "installationId" INTEGER,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    UNIQUE INDEX `RepoConfig_repositoryId_key`(`repositoryId`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
-CREATE TABLE `repository` (
-    `id` VARCHAR(191) NOT NULL,
-    `userId` VARCHAR(191) NOT NULL,
-    `githubRepoId` INTEGER NOT NULL,
-    `owner` VARCHAR(191) NOT NULL,
-    `name` VARCHAR(191) NOT NULL,
-    `fullName` VARCHAR(191) NOT NULL,
-    `description` TEXT NULL,
-    `defaultBranch` VARCHAR(191) NOT NULL DEFAULT 'main',
-    `isPrivate` BOOLEAN NOT NULL DEFAULT false,
-    `lastSyncedAt` DATETIME(3) NULL,
-    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL,
+CREATE TABLE "ApiKey" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "provider" TEXT NOT NULL DEFAULT 'openrouter',
+    "encryptedKey" TEXT NOT NULL,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "defaultModel" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    UNIQUE INDEX `Repository_githubRepoId_key`(`githubRepoId`),
-    INDEX `Repository_fullName_idx`(`fullName`),
-    INDEX `Repository_userId_idx`(`userId`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    CONSTRAINT "ApiKey_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
-CREATE TABLE `systemconfig` (
-    `id` VARCHAR(191) NOT NULL,
-    `key` VARCHAR(191) NOT NULL,
-    `value` TEXT NOT NULL,
-    `description` VARCHAR(191) NULL,
-    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL,
+CREATE TABLE "UserUsage" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "date" TEXT NOT NULL,
+    "count" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    UNIQUE INDEX `SystemConfig_key_key`(`key`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
-CREATE TABLE `translatedfile` (
-    `id` VARCHAR(191) NOT NULL,
-    `translationTaskId` VARCHAR(191) NOT NULL,
-    `sourcePath` VARCHAR(191) NOT NULL,
-    `targetPath` VARCHAR(191) NOT NULL,
-    `targetLanguage` VARCHAR(191) NOT NULL,
-    `status` ENUM('PENDING', 'TRANSLATING', 'COMPLETED', 'FAILED', 'SKIPPED') NOT NULL DEFAULT 'PENDING',
-    `sourceContent` LONGTEXT NULL,
-    `translatedContent` LONGTEXT NULL,
-    `tokensUsed` INTEGER NULL,
-    `errorMessage` TEXT NULL,
-    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL,
-
-    INDEX `TranslatedFile_status_idx`(`status`),
-    INDEX `TranslatedFile_translationTaskId_idx`(`translationTaskId`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    CONSTRAINT "UserUsage_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
-CREATE TABLE `translationtask` (
-    `id` VARCHAR(191) NOT NULL,
-    `userId` VARCHAR(191) NOT NULL,
-    `repositoryId` VARCHAR(191) NOT NULL,
-    `status` ENUM('PENDING', 'RUNNING', 'COMPLETED', 'FAILED', 'CANCELLED') NOT NULL DEFAULT 'PENDING',
-    `type` ENUM('FULL', 'INCREMENTAL') NOT NULL DEFAULT 'FULL',
-    `targetLanguages` JSON NOT NULL,
-    `totalFiles` INTEGER NOT NULL DEFAULT 0,
-    `completedFiles` INTEGER NOT NULL DEFAULT 0,
-    `failedFiles` INTEGER NOT NULL DEFAULT 0,
-    `progress` DOUBLE NOT NULL DEFAULT 0,
-    `errorMessage` TEXT NULL,
-    `pullRequestUrl` VARCHAR(191) NULL,
-    `pullRequestNumber` INTEGER NULL,
-    `startedAt` DATETIME(3) NULL,
-    `completedAt` DATETIME(3) NULL,
-    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL,
+CREATE TABLE "Repository" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "githubRepoId" INTEGER NOT NULL,
+    "owner" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "fullName" TEXT NOT NULL,
+    "description" TEXT,
+    "defaultBranch" TEXT NOT NULL DEFAULT 'main',
+    "isPrivate" BOOLEAN NOT NULL DEFAULT false,
+    "lastSyncedAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    INDEX `TranslationTask_repositoryId_idx`(`repositoryId`),
-    INDEX `TranslationTask_status_idx`(`status`),
-    INDEX `TranslationTask_userId_idx`(`userId`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    CONSTRAINT "Repository_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
-CREATE TABLE `user` (
-    `id` VARCHAR(191) NOT NULL,
-    `githubId` INTEGER NOT NULL,
-    `login` VARCHAR(191) NOT NULL,
-    `name` VARCHAR(191) NULL,
-    `email` VARCHAR(191) NULL,
-    `avatarUrl` VARCHAR(191) NULL,
-    `accessToken` TEXT NOT NULL,
-    `installationId` INTEGER NULL,
-    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL,
+CREATE TABLE "RepoConfig" (
+    "id" TEXT NOT NULL,
+    "repositoryId" TEXT NOT NULL,
+    "baseLanguage" TEXT NOT NULL DEFAULT 'zh-CN',
+    "targetLanguages" JSONB NOT NULL,
+    "includePaths" JSONB,
+    "excludePaths" JSONB,
+    "translationBranch" TEXT NOT NULL DEFAULT 'translations',
+    "aiModel" TEXT,
+    "autoTranslate" BOOLEAN NOT NULL DEFAULT false,
+    "webhookId" INTEGER,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    UNIQUE INDEX `User_githubId_key`(`githubId`),
-    INDEX `User_githubId_idx`(`githubId`),
-    INDEX `User_login_idx`(`login`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    CONSTRAINT "RepoConfig_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
-CREATE TABLE `userusage` (
-    `id` VARCHAR(191) NOT NULL,
-    `userId` VARCHAR(191) NOT NULL,
-    `date` VARCHAR(191) NOT NULL,
-    `count` INTEGER NOT NULL DEFAULT 0,
-    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL,
+CREATE TABLE "TranslationTask" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "repositoryId" TEXT NOT NULL,
+    "status" "TranslationStatus" NOT NULL DEFAULT 'PENDING',
+    "type" "TaskType" NOT NULL DEFAULT 'FULL',
+    "targetLanguages" JSONB NOT NULL,
+    "totalFiles" INTEGER NOT NULL DEFAULT 0,
+    "completedFiles" INTEGER NOT NULL DEFAULT 0,
+    "failedFiles" INTEGER NOT NULL DEFAULT 0,
+    "progress" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "errorMessage" TEXT,
+    "pullRequestUrl" TEXT,
+    "pullRequestNumber" INTEGER,
+    "startedAt" TIMESTAMP(3),
+    "completedAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    INDEX `UserUsage_date_idx`(`date`),
-    INDEX `UserUsage_userId_idx`(`userId`),
-    UNIQUE INDEX `UserUsage_userId_date_key`(`userId`, `date`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    CONSTRAINT "TranslationTask_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "TranslatedFile" (
+    "id" TEXT NOT NULL,
+    "translationTaskId" TEXT NOT NULL,
+    "sourcePath" TEXT NOT NULL,
+    "targetPath" TEXT NOT NULL,
+    "targetLanguage" TEXT NOT NULL,
+    "status" "FileStatus" NOT NULL DEFAULT 'PENDING',
+    "sourceContent" TEXT,
+    "translatedContent" TEXT,
+    "tokensUsed" INTEGER,
+    "errorMessage" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "TranslatedFile_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "SystemConfig" (
+    "id" TEXT NOT NULL,
+    "key" TEXT NOT NULL,
+    "value" TEXT NOT NULL,
+    "description" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "SystemConfig_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_githubId_key" ON "User"("githubId");
+
+-- CreateIndex
+CREATE INDEX "User_githubId_idx" ON "User"("githubId");
+
+-- CreateIndex
+CREATE INDEX "User_login_idx" ON "User"("login");
+
+-- CreateIndex
+CREATE INDEX "ApiKey_userId_idx" ON "ApiKey"("userId");
+
+-- CreateIndex
+CREATE INDEX "UserUsage_userId_idx" ON "UserUsage"("userId");
+
+-- CreateIndex
+CREATE INDEX "UserUsage_date_idx" ON "UserUsage"("date");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "UserUsage_userId_date_key" ON "UserUsage"("userId", "date");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Repository_githubRepoId_key" ON "Repository"("githubRepoId");
+
+-- CreateIndex
+CREATE INDEX "Repository_userId_idx" ON "Repository"("userId");
+
+-- CreateIndex
+CREATE INDEX "Repository_fullName_idx" ON "Repository"("fullName");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "RepoConfig_repositoryId_key" ON "RepoConfig"("repositoryId");
+
+-- CreateIndex
+CREATE INDEX "TranslationTask_userId_idx" ON "TranslationTask"("userId");
+
+-- CreateIndex
+CREATE INDEX "TranslationTask_repositoryId_idx" ON "TranslationTask"("repositoryId");
+
+-- CreateIndex
+CREATE INDEX "TranslationTask_status_idx" ON "TranslationTask"("status");
+
+-- CreateIndex
+CREATE INDEX "TranslatedFile_translationTaskId_idx" ON "TranslatedFile"("translationTaskId");
+
+-- CreateIndex
+CREATE INDEX "TranslatedFile_status_idx" ON "TranslatedFile"("status");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "SystemConfig_key_key" ON "SystemConfig"("key");
 
 -- AddForeignKey
-ALTER TABLE `apikey` ADD CONSTRAINT `ApiKey_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ApiKey" ADD CONSTRAINT "ApiKey_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `repoConfig` ADD CONSTRAINT `RepoConfig_repositoryId_fkey` FOREIGN KEY (`repositoryId`) REFERENCES `repository`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "UserUsage" ADD CONSTRAINT "UserUsage_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `repository` ADD CONSTRAINT `Repository_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Repository" ADD CONSTRAINT "Repository_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `translatedfile` ADD CONSTRAINT `TranslatedFile_translationTaskId_fkey` FOREIGN KEY (`translationTaskId`) REFERENCES `translationtask`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "RepoConfig" ADD CONSTRAINT "RepoConfig_repositoryId_fkey" FOREIGN KEY ("repositoryId") REFERENCES "Repository"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `translationtask` ADD CONSTRAINT `TranslationTask_repositoryId_fkey` FOREIGN KEY (`repositoryId`) REFERENCES `repository`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "TranslationTask" ADD CONSTRAINT "TranslationTask_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `translationtask` ADD CONSTRAINT `TranslationTask_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "TranslationTask" ADD CONSTRAINT "TranslationTask_repositoryId_fkey" FOREIGN KEY ("repositoryId") REFERENCES "Repository"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `userusage` ADD CONSTRAINT `UserUsage_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "TranslatedFile" ADD CONSTRAINT "TranslatedFile_translationTaskId_fkey" FOREIGN KEY ("translationTaskId") REFERENCES "TranslationTask"("id") ON DELETE CASCADE ON UPDATE CASCADE;
