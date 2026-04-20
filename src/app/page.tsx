@@ -87,14 +87,22 @@ export default function Home() {
                 </Button>
               ) : session?.user ? (
                 <Link href="/dashboard">
-                  <Button size="lg" className="w-full sm:w-auto">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="w-full sm:w-auto"
+                  >
                     进入控制台
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
               ) : (
                 <Link href="/login">
-                  <Button size="lg" className="w-full sm:w-auto">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="w-full sm:w-auto"
+                  >
                     使用 GitHub 登录
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
@@ -105,13 +113,13 @@ export default function Home() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <Button
+                {/* <Button
                   size="lg"
                   variant="outline"
                   className="w-full sm:w-auto"
                 >
                   查看源码
-                </Button>
+                </Button> */}
               </a>
             </div>
           </div>
