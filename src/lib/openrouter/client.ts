@@ -65,7 +65,7 @@ export async function createChatCompletion(
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
         "HTTP-Referer": process.env.NEXTAUTH_URL || "https://github-global.com",
-        "X-Title": "GitHub Global",
+        "X-Title": "RepoLingo",
       },
       body: JSON.stringify({
         model: request.model,
