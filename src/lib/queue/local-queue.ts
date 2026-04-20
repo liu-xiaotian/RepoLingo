@@ -107,12 +107,25 @@ export class LocalQueue<T> extends EventEmitter {
 }
 
 // 翻译任务队列数据类型
-export interface TranslationJobData {
+export interface BaseTranslationJobData {
   taskId: string;
   userId: string;
   repositoryId: string;
   targetLanguages: string[];
 }
+
+export interface FullTranslationJobData extends BaseTranslationJobData {
+  type?: "FULL";
+}
+
+export interface IncrementalTranslationJobData extends BaseTranslationJobData {
+  type: "INCREMENTAL";
+  changedFiles: string[];
+}
+
+export type TranslationJobData =
+  | FullTranslationJobData
+  | IncrementalTranslationJobData;
 
 // 创建全局翻译队列实例
 export const translationQueue = new LocalQueue<TranslationJobData>(3);
