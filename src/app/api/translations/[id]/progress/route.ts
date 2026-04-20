@@ -9,14 +9,14 @@ import { prisma } from "@/lib/db";
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await auth();
   if (!session?.user?.id) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const taskId = params.id;
+  const { id: taskId } = await params;
 
   // 验证任务归属
   const task = await prisma.translationTask.findFirst({
@@ -83,7 +83,7 @@ export async function GET(
           clearInterval(pollInterval);
           controller.close();
         }
-      }, 1000); // 每秒轮询一次
+      }, 1000);
 
       // 清理
       request.signal.addEventListener("abort", () => {

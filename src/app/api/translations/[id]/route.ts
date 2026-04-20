@@ -9,7 +9,7 @@ import { prisma } from "@/lib/db";
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await auth();
@@ -17,9 +17,11 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
+
     const task = await prisma.translationTask.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id,
       },
       include: {
@@ -56,7 +58,7 @@ export async function GET(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await auth();
@@ -64,9 +66,11 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
+
     const task = await prisma.translationTask.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id,
       },
     });
@@ -84,7 +88,7 @@ export async function DELETE(
     }
 
     await prisma.translationTask.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         status: "CANCELLED",
         completedAt: new Date(),
