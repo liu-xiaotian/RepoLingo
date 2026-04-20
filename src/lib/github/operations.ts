@@ -3,6 +3,7 @@
 import { Octokit } from "octokit";
 import { FileTreeNode } from "@/types";
 import { SKIP_DIRECTORIES } from "@/config/constants";
+import { getErrorStatus } from "@/lib/errors";
 
 /**
  * 获取仓库内容
@@ -189,8 +190,8 @@ export async function getFileSha(
     }
 
     return data.sha;
-  } catch (error: any) {
-    if (error.status === 404) {
+  } catch (error) {
+    if (getErrorStatus(error) === 404) {
       return null;
     }
     throw error;
@@ -331,8 +332,8 @@ export async function fileExists(
       ref,
     });
     return true;
-  } catch (error: any) {
-    if (error.status === 404) {
+  } catch (error) {
+    if (getErrorStatus(error) === 404) {
       return false;
     }
     throw error;

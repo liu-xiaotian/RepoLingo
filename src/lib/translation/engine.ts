@@ -73,10 +73,6 @@ async function getApiKeyAndModelForUser(
  * 获取用户的 API Key（优先用户自带，否则使用平台托管）
  * @deprecated 使用 getApiKeyAndModelForUser 代替
  */
-async function getApiKeyForUser(userId: string): Promise<string> {
-  const { apiKey } = await getApiKeyAndModelForUser(userId);
-  return apiKey;
-}
 
 /**
  * 获取待翻译的文件列表

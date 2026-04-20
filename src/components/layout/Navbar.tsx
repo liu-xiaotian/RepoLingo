@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
@@ -65,9 +66,12 @@ export function Navbar({ user }: NavbarProps) {
                 </Link>
                 <div className="flex items-center gap-3 ml-2 pl-4 border-l">
                   {user.image && (
-                    <img
+                    <Image
                       src={user.image}
                       alt={user.name || "User"}
+                      width={32}
+                      height={32}
+                      unoptimized
                       className="h-8 w-8 rounded-full"
                     />
                   )}
@@ -82,7 +86,11 @@ export function Navbar({ user }: NavbarProps) {
                     onClick={handleLogout}
                     disabled={isLoggingOut}
                   >
-                    <LogOut className="h-4 w-4" />
+                    {isLoggingOut ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <LogOut className="h-4 w-4" />
+                    )}
                     <span className="ml-2 hidden lg:inline">退出</span>
                   </Button>
                 </div>
@@ -118,9 +126,12 @@ export function Navbar({ user }: NavbarProps) {
               <div className="space-y-2">
                 <div className="flex items-center gap-3 py-2">
                   {user.image && (
-                    <img
+                    <Image
                       src={user.image}
                       alt={user.name || "User"}
+                      width={40}
+                      height={40}
+                      unoptimized
                       className="h-10 w-10 rounded-full"
                     />
                   )}
@@ -144,7 +155,11 @@ export function Navbar({ user }: NavbarProps) {
                   onClick={handleLogout}
                   disabled={isLoggingOut}
                 >
-                  <LogOut className="mr-2 h-4 w-4" />
+                  {isLoggingOut ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <LogOut className="mr-2 h-4 w-4" />
+                  )}
                   退出登录
                 </Button>
               </div>

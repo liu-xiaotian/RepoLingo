@@ -36,7 +36,7 @@ export class OpenRouterError extends Error {
   constructor(
     message: string,
     public statusCode: number,
-    public response?: any,
+    public response?: unknown,
   ) {
     super(message);
     this.name = "OpenRouterError";

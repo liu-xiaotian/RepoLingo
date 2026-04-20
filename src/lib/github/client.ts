@@ -56,7 +56,7 @@ export async function getInstallationOctokit(
     }
 
     return octokit;
-  } catch (error: any) {
+  } catch (error) {
     console.error("[GitHub] Failed to get installation octokit:", error);
     // 保留原始错误，以便调用方可以检查 status
     throw error;
@@ -68,14 +68,17 @@ export function getUserOctokit(accessToken: string): Octokit {
   return new Octokit({
     auth: accessToken,
     throttle: {
-      onRateLimit: (retryAfter: number, options: any) => {
+      onRateLimit: (
+        retryAfter: number,
+        options: { request: { retryCount: number } },
+      ) => {
         console.warn(`Rate limit hit, retrying after ${retryAfter}s`);
         if (options.request.retryCount <= 2) {
           return true; // 重试
         }
         return false;
       },
-      onSecondaryRateLimit: (retryAfter: number, options: any) => {
+      onSecondaryRateLimit: () => {
         console.warn(`Secondary rate limit hit`);
         return false;
       },

@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { getInstallationOctokit, getUserOctokit } from "@/lib/github/client";
 import { getFileTree } from "@/lib/github/operations";
 import { decrypt } from "@/lib/crypto";
+import { getErrorMessage, getErrorStatus } from "@/lib/errors";
 
 /**
  * GET /api/repos/:id/files - 获取仓库文件树
@@ -15,6 +16,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    void request;
+
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -43,10 +46,10 @@ export async function GET(
     if (repository.user.installationId) {
       try {
         octokit = await getInstallationOctokit(repository.user.installationId);
-      } catch (installError: any) {
+      } catch (installError) {
         console.warn(
           "[Files API] Installation token failed, trying user token:",
-          installError.message,
+          getErrorMessage(installError, "Unknown error"),
         );
 
         // Installation 失效（404表示 installation 不存在），尝试使用用户 token
@@ -55,7 +58,7 @@ export async function GET(
           octokit = getUserOctokit(accessToken);
 
           // 清除失效的 installationId
-          if (installError.status === 404) {
+          if (getErrorStatus(installError) === 404) {
             await prisma.user.update({
               where: { id: repository.user.id },
               data: { installationId: null },
@@ -97,15 +100,17 @@ export async function GET(
     );
 
     return NextResponse.json({ tree });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Get file tree error:", error);
+    const errorStatus = getErrorStatus(error);
+    const errorMessage = getErrorMessage(error, "");
 
     // 检查是否是 installation 相关的错误（可能在调用 API 时才触发）
     const isInstallationError =
-      error.status === 404 &&
-      (error.message?.includes("installation") ||
-        error.message?.includes("Installation") ||
-        error.message?.includes("access-token"));
+      errorStatus === 404 &&
+      (errorMessage.includes("installation") ||
+        errorMessage.includes("Installation") ||
+        errorMessage.includes("access-token"));
 
     if (isInstallationError) {
       return NextResponse.json(
@@ -119,7 +124,7 @@ export async function GET(
     }
 
     // 检查是否是权限不足
-    if (error.status === 403) {
+    if (errorStatus === 403) {
       return NextResponse.json(
         {
           error:
@@ -131,7 +136,7 @@ export async function GET(
     }
 
     // 检查是否是仓库不存在
-    if (error.status === 404) {
+    if (errorStatus === 404) {
       return NextResponse.json(
         {
           error:

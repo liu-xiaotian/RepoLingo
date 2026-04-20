@@ -11,6 +11,7 @@ import {
   getWebhookSecret,
 } from "@/lib/github/webhook";
 import { decrypt } from "@/lib/crypto";
+import { getErrorMessage, getErrorStatus } from "@/lib/errors";
 import { UpdateRepoConfigRequest } from "@/types";
 
 /**
@@ -115,11 +116,11 @@ export async function PUT(
           console.log(
             `[Config] Created webhook ${webhookId} for ${repository.fullName}`,
           );
-        } catch (error: any) {
+        } catch (error) {
           console.error("[Config] Failed to create webhook:", error);
 
           // 如果 webhook 已存在，尝试获取错误信息
-          if (error.status === 422) {
+          if (getErrorStatus(error) === 422) {
             return NextResponse.json(
               {
                 error:
@@ -130,7 +131,9 @@ export async function PUT(
           }
 
           return NextResponse.json(
-            { error: `Failed to create webhook: ${error.message}` },
+            {
+              error: `Failed to create webhook: ${getErrorMessage(error, "Unknown error")}`,
+            },
             { status: 500 },
           );
         }
@@ -151,7 +154,7 @@ export async function PUT(
           );
           webhookId = null;
           console.log(`[Config] Deleted webhook for ${repository.fullName}`);
-        } catch (error: any) {
+        } catch (error) {
           console.error("[Config] Failed to delete webhook:", error);
           // 即使删除失败也继续，webhook 可能已被手动删除
         }

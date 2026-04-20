@@ -33,8 +33,8 @@ import {
 import {
   SUPPORTED_LANGUAGES,
   SUPPORTED_AI_MODELS,
-  DEFAULT_AI_MODEL,
 } from "@/lib/constants";
+import { getErrorMessage } from "@/lib/errors";
 
 // 文件树节点类型
 interface FileNode {
@@ -70,7 +70,7 @@ export default function RepoConfigPage({
   const [expandedDirs, setExpandedDirs] = useState<Set<string>>(new Set());
   const [aiModel, setAiModel] = useState<string | null>(null); // null 表示使用默认设置
   const [autoTranslate, setAutoTranslate] = useState(false); // 是否启用自动翻译
-  const [isTogglingAuto, setIsTogglingAuto] = useState(false); // 自动翻译开关切换中
+  const isTogglingAuto = false;
 
   // 检查登录状态
   useEffect(() => {
@@ -129,9 +129,9 @@ export default function RepoConfigPage({
           // 文件树加载失败不阻止页面显示，只是文件选择功能不可用
           console.warn("Failed to load file tree:", filesError);
         }
-      } catch (err: any) {
+      } catch (err) {
         console.error("Fetch config error:", err);
-        setError(err.message || "加载配置失败");
+        setError(getErrorMessage(err, "加载配置失败"));
       } finally {
         setIsLoading(false);
       }
@@ -276,9 +276,9 @@ export default function RepoConfigPage({
       setTimeout(() => {
         router.push(`/repo/${id}`);
       }, 1500);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Save config error:", err);
-      setSaveError(err.message || "保存配置失败");
+      setSaveError(getErrorMessage(err, "保存配置失败"));
     } finally {
       setIsSaving(false);
     }

@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
 /**
  * GET /api/settings/api-key - 获取 API Key 列表（包含默认模型）
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await auth();
     if (!session?.user?.id) {

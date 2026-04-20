@@ -16,7 +16,7 @@ import { Loader2, AlertCircle, FolderGit } from "lucide-react";
 
 // 登录页面内容组件
 function LoginContent() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);

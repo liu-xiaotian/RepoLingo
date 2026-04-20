@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -30,7 +31,7 @@ import {
   Check,
 } from "lucide-react";
 import { SUPPORTED_AI_MODELS, DEFAULT_AI_MODEL } from "@/lib/constants";
-import type { AIModel } from "@/types";
+import { getErrorMessage } from "@/lib/errors";
 
 interface Usage {
   today: {
@@ -125,9 +126,9 @@ export default function SettingsPage() {
       setApiKey("");
 
       setTimeout(() => setSaveSuccess(false), 3000);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Save API key error:", err);
-      setSaveError(err.message || "保存 API Key 失败");
+      setSaveError(getErrorMessage(err, "保存 API Key 失败"));
     } finally {
       setIsSaving(false);
     }
@@ -561,9 +562,12 @@ export default function SettingsPage() {
             <CardContent className="space-y-4">
               <div className="flex items-center gap-4">
                 {session?.user?.image ? (
-                  <img
+                  <Image
                     src={session.user.image}
                     alt={session.user.name || "User"}
+                    width={64}
+                    height={64}
+                    unoptimized
                     className="w-14 h-14 md:w-16 md:h-16 rounded-full"
                   />
                 ) : (

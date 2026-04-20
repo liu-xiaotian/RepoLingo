@@ -36,7 +36,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ account, profile }) {
       try {
         if (!account || !profile) {
           console.error("[Auth] Missing account or profile data");
@@ -94,7 +94,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // 登录成功后跳转到 setup 页面检查安装状态
       return baseUrl + "/setup";
     },
-    async jwt({ token, user, account, profile }) {
+    async jwt({ token, account, profile }) {
       if (profile) {
         const githubId =
           typeof profile.id === "number"

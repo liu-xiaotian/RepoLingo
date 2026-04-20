@@ -1,13 +1,13 @@
 // 删除当前激活的 API Key
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 
 /**
  * DELETE /api/settings/api-key/current - 删除当前激活的 API Key
  */
-export async function DELETE(request: NextRequest) {
+export async function DELETE() {
   try {
     const session = await auth();
     if (!session?.user?.id) {

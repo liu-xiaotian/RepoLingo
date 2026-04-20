@@ -1,15 +1,15 @@
 // 获取 GitHub App 安装 URL
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { getErrorMessage } from "@/lib/errors";
 
 /**
  * GET /api/github/install-url - 获取 GitHub App 安装链接
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await auth();
-    console.log(session);
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -33,7 +33,6 @@ export async function GET(request: NextRequest) {
     // 构建 GitHub App 安装 URL
     // 格式：https://github.com/apps/{app-slug}/installations/new
     // 用户点击后会跳转到 GitHub 的安装页面，选择仓库后会回调到我们的应用
-    const baseUrl = request.nextUrl.origin;
     const state = Buffer.from(
       JSON.stringify({
         returnTo: "/setup",
@@ -48,10 +47,10 @@ export async function GET(request: NextRequest) {
       message: "将跳转到 GitHub App 安装页面，选择要授权的仓库后会自动返回",
       appSlug,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Get install URL error:", error);
     return NextResponse.json(
-      { error: error.message || "Internal server error" },
+      { error: getErrorMessage(error, "Internal server error") },
       { status: 500 },
     );
   }

@@ -6,7 +6,7 @@ export interface Job<T> {
   id: string;
   data: T;
   status: "pending" | "running" | "completed" | "failed";
-  result?: any;
+  result?: unknown;
   error?: Error;
   createdAt: Date;
   startedAt?: Date;
@@ -29,14 +29,14 @@ export class LocalQueue<T> extends EventEmitter {
 
   // 处理任务的函数，可选，用于执行队列中的任务
   // 接收类型为 T 的数据，返回一个 Promise，表示异步操作
-  private processor?: (data: T) => Promise<any>;
+  private processor?: (data: T) => Promise<unknown>;
 
   constructor(concurrency: number = 3) {
     super();
     this.concurrency = concurrency;
   }
 
-  setProcessor(fn: (data: T) => Promise<any>) {
+  setProcessor(fn: (data: T) => Promise<unknown>) {
     this.processor = fn;
   }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -25,6 +25,7 @@ import {
   Languages,
   ExternalLink,
 } from "lucide-react";
+import { getErrorMessage } from "@/lib/errors";
 
 // 仓库类型定义
 interface Repository {
@@ -63,7 +64,7 @@ export default function DashboardPage() {
   }, [sessionStatus, router]);
 
   // 加载仓库列表
-  const fetchRepos = async () => {
+  const fetchRepos = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -79,20 +80,20 @@ export default function DashboardPage() {
 
       const data = await response.json();
       setRepos(data.repos || []);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Fetch repos error:", err);
-      setError(err.message || "加载仓库列表失败，请刷新页面重试");
+      setError(getErrorMessage(err, "加载仓库列表失败，请刷新页面重试"));
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [router]);
 
   // 页面加载时获取仓库列表
   useEffect(() => {
     if (sessionStatus === "authenticated") {
       fetchRepos();
     }
-  }, [sessionStatus]);
+  }, [sessionStatus, fetchRepos]);
 
   // 导入仓库
   const handleImport = async () => {
@@ -134,9 +135,9 @@ export default function DashboardPage() {
       // 导入成功，刷新列表
       setRepoUrl("");
       await fetchRepos();
-    } catch (err: any) {
+    } catch (err) {
       console.error("Import repo error:", err);
-      setImportError(err.message || "导入仓库失败，请检查 URL 是否正确");
+      setImportError(getErrorMessage(err, "导入仓库失败，请检查 URL 是否正确"));
     } finally {
       setIsImporting(false);
     }

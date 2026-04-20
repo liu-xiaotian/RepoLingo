@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -19,6 +18,7 @@ import {
   ExternalLink,
   RefreshCw,
 } from "lucide-react";
+import { getErrorMessage } from "@/lib/errors";
 
 export default function SetupPage() {
   const { data: session, status: sessionStatus } = useSession();
@@ -78,7 +78,12 @@ export default function SetupPage() {
       if (data.totalCount > 0) {
         setHasInstallation(true);
         // 停止轮询
-        stopPolling();
+        if (pollIntervalRef.current) {
+          clearInterval(pollIntervalRef.current);
+          pollIntervalRef.current = null;
+        }
+        setIsWaitingForInstall(false);
+        setPollCount(0);
         // 安装成功，跳转到控制台
         setTimeout(() => {
           router.push("/dashboard");
@@ -86,9 +91,9 @@ export default function SetupPage() {
       } else {
         setHasInstallation(false);
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("Check installation error:", err);
-      setError(err.message || "检查安装状态失败");
+      setError(getErrorMessage(err, "检查安装状态失败"));
     } finally {
       setIsChecking(false);
     }
@@ -128,7 +133,7 @@ export default function SetupPage() {
           if (installWindowRef.current && !installWindowRef.current.closed) {
             installWindowRef.current.close();
           }
-        } catch (e) {
+        } catch {
           // 忽略跨域错误
         }
 
@@ -179,7 +184,7 @@ export default function SetupPage() {
         } else {
           setError(data.error || "无法获取安装链接");
         }
-      } catch (err: any) {
+      } catch (err) {
         console.error("Fetch install URL error:", err);
         setError("获取安装链接失败");
       } finally {

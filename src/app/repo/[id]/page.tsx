@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useCallback, useEffect, useState, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -16,7 +16,6 @@ import { Progress } from "@/components/ui/progress";
 import { Navbar, Footer } from "@/components/layout";
 import {
   ArrowLeft,
-  Settings,
   Trash,
   Play,
   GitBranch,
@@ -31,6 +30,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { SUPPORTED_LANGUAGES } from "@/lib/constants";
+import { getErrorMessage } from "@/lib/errors";
 import { toast } from "sonner"; // 记得在 layout.tsx 中添加 <Toaster />
 
 // 类型定义
@@ -84,7 +84,7 @@ export default function RepoDetailPage({
 
     toast.promise(deletePromise, {
       loading: "正在删除项目...",
-      success: (res: any) => {
+      success: (res: Response) => {
         if (!res.ok) throw new Error("删除失败");
 
         // 2. 成功后跳转到 dashboard
@@ -105,7 +105,7 @@ export default function RepoDetailPage({
   }, [sessionStatus, router]);
 
   // 加载仓库详情
-  const fetchRepo = async (showLoading = true) => {
+  const fetchRepo = useCallback(async (showLoading = true) => {
     try {
       // 只有初始加载时才显示加载状态，轮询刷新时不显示
       if (showLoading) {
@@ -130,24 +130,24 @@ export default function RepoDetailPage({
 
       const data = await response.json();
       setRepo(data.repository);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Fetch repo error:", err);
       // 轮询时出错不显示错误，避免干扰用户
       if (showLoading) {
-        setError(err.message || "加载仓库详情失败");
+        setError(getErrorMessage(err, "加载仓库详情失败"));
       }
     } finally {
       if (showLoading) {
         setIsLoading(false);
       }
     }
-  };
+  }, [id, router]);
 
   useEffect(() => {
     if (sessionStatus === "authenticated") {
       fetchRepo();
     }
-  }, [id, sessionStatus]);
+  }, [sessionStatus, fetchRepo]);
 
   // 自动刷新运行中的任务（静默刷新，不显示加载状态）
   useEffect(() => {
@@ -159,7 +159,7 @@ export default function RepoDetailPage({
       const interval = setInterval(() => fetchRepo(false), 5000); // 每5秒静默刷新
       return () => clearInterval(interval);
     }
-  }, [repo?.translationTasks]);
+  }, [repo?.translationTasks, fetchRepo]);
 
   // 创建翻译任务
   const handleCreateTask = async () => {
@@ -200,9 +200,9 @@ export default function RepoDetailPage({
 
       // 创建成功，刷新页面数据
       await fetchRepo();
-    } catch (err: any) {
+    } catch (err) {
       console.error("Create task error:", err);
-      setTaskError(err.message || "创建翻译任务失败");
+      setTaskError(getErrorMessage(err, "创建翻译任务失败"));
     } finally {
       setIsCreatingTask(false);
     }

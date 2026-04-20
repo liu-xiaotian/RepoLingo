@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { getErrorMessage } from "@/lib/errors";
 
 /**
  * POST /api/github/callback - 处理 GitHub App 安装回调
@@ -50,10 +51,10 @@ export async function POST(request: NextRequest) {
       installationId: installationIdNum,
       message: "Installation ID updated successfully",
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("GitHub callback error:", error);
     return NextResponse.json(
-      { error: error.message || "Internal server error" },
+      { error: getErrorMessage(error, "Internal server error") },
       { status: 500 },
     );
   }

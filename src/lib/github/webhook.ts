@@ -2,6 +2,7 @@
 
 import { Octokit } from "octokit";
 import { createHmac, timingSafeEqual } from "crypto";
+import { getErrorStatus } from "@/lib/errors";
 
 /**
  * Webhook 配置
@@ -55,9 +56,9 @@ export async function deleteWebhook(
       hook_id: hookId,
     });
     console.log(`[Webhook] Deleted webhook ${hookId} for ${owner}/${repo}`);
-  } catch (error: any) {
+  } catch (error) {
     // 如果 webhook 不存在（404），忽略错误
-    if (error.status === 404) {
+    if (getErrorStatus(error) === 404) {
       console.log(`[Webhook] Webhook ${hookId} not found, skipping delete`);
       return;
     }
@@ -81,8 +82,8 @@ export async function webhookExists(
       hook_id: hookId,
     });
     return true;
-  } catch (error: any) {
-    if (error.status === 404) {
+  } catch (error) {
+    if (getErrorStatus(error) === 404) {
       return false;
     }
     throw error;

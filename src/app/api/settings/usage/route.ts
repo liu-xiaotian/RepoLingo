@@ -1,6 +1,6 @@
 // 用户使用量查询
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getUserUsage } from "@/lib/ratelimit";
 import { prisma } from "@/lib/db";
@@ -8,7 +8,7 @@ import { prisma } from "@/lib/db";
 /**
  * GET /api/settings/usage - 获取用户使用量和默认模型
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await auth();
     if (!session?.user?.id) {

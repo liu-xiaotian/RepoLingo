@@ -1,14 +1,15 @@
 // GitHub App Installations API
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { decrypt } from "@/lib/crypto";
 import { getUserOctokit } from "@/lib/github/client";
+import { getErrorMessage } from "@/lib/errors";
 /**
  * GET /api/github/installations - 获取用户的 GitHub App 安装列表
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -30,17 +31,18 @@ export async function GET(request: NextRequest) {
     const octokit = getUserOctokit(accessToken);
 
     // 获取用户的所有 GitHub App 安装
-    const { data: installations } =
+    const { data: installationsResponse } =
       await octokit.rest.apps.listInstallationsForAuthenticatedUser();
+    const installations = installationsResponse.installations;
 
     let currentInstallationId = user.installationId;
 
     // 如果找到安装，更新用户的 installationId
-    if (installations.total_count > 0) {
-      const firstInstallation = installations.installations[0];
+    if (installationsResponse.total_count > 0) {
+      const firstInstallation = installations[0];
 
       // 检查当前存储的 installationId 是否在有效安装列表中
-      const isCurrentIdValid = installations.installations.some(
+      const isCurrentIdValid = installations.some(
         (inst) => inst.id === user.installationId,
       );
 
@@ -69,19 +71,22 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({
-      installations: installations.installations.map((inst: any) => ({
+      installations: installations.map((inst) => ({
         id: inst.id,
-        account: inst.account?.login || "unknown",
+        account:
+          inst.account && "login" in inst.account
+            ? inst.account.login
+            : inst.account?.name || "unknown",
         repositorySelection: inst.repository_selection,
         permissions: inst.permissions,
       })),
-      totalCount: installations.total_count,
+      totalCount: installationsResponse.total_count,
       currentInstallationId,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Get installations error:", error);
     return NextResponse.json(
-      { error: error.message || "Internal server error" },
+      { error: getErrorMessage(error, "Internal server error") },
       { status: 500 },
     );
   }

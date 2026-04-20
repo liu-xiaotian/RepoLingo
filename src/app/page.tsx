@@ -12,7 +12,6 @@ import {
   Languages,
   GitPullRequest,
   ArrowRight,
-  CheckCircle2,
   Loader2,
 } from "lucide-react";
 

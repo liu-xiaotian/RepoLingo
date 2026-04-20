@@ -6,11 +6,12 @@ import { prisma } from "@/lib/db";
 import { getUserOctokit } from "@/lib/github/client";
 import { getRepository } from "@/lib/github/operations";
 import { decrypt } from "@/lib/crypto";
+import { getErrorStatus } from "@/lib/errors";
 
 /**
  * GET /api/repos - 获取用户仓库列表
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -130,10 +131,10 @@ export async function POST(request: NextRequest) {
         name: repository.name,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Import repo error:", error);
 
-    if (error.status === 404) {
+    if (getErrorStatus(error) === 404) {
       return NextResponse.json(
         { error: "Repository not found or no access" },
         { status: 404 },
