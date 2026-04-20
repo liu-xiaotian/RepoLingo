@@ -17,6 +17,7 @@ import { Navbar, Footer } from "@/components/layout";
 import {
   ArrowLeft,
   Settings,
+  Trash,
   Play,
   GitBranch,
   Clock,
@@ -30,6 +31,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { SUPPORTED_LANGUAGES } from "@/lib/constants";
+import { toast } from "sonner"; // 记得在 layout.tsx 中添加 <Toaster />
 
 // 类型定义
 interface TranslationTask {
@@ -76,6 +78,25 @@ export default function RepoDetailPage({
   const [isCreatingTask, setIsCreatingTask] = useState(false);
   const [taskError, setTaskError] = useState<string | null>(null);
 
+  const hundleDelete = async () => {
+    // 1. 发起请求并立即显示 loading 状态
+    const deletePromise = fetch(`/api/repos/${id}`, { method: "DELETE" });
+
+    toast.promise(deletePromise, {
+      loading: "正在删除项目...",
+      success: (res: any) => {
+        if (!res.ok) throw new Error("删除失败");
+
+        // 2. 成功后跳转到 dashboard
+        router.push("/dashboard");
+        // 3. 可以在跳转后刷新数据
+        router.refresh();
+
+        return "项目已成功删除";
+      },
+      error: "删除过程中出现错误",
+    });
+  };
   // 检查登录状态
   useEffect(() => {
     if (sessionStatus === "unauthenticated") {
@@ -324,12 +345,20 @@ export default function RepoDetailPage({
                   {repo.description || "暂无描述"}
                 </p>
               </div>
-              <Link href={`/repo/${id}/config`} className="flex-shrink-0">
+              {/* <Link href={`/repo/${id}/config`} className="flex-shrink-0">
                 <Button variant="outline" className="w-full md:w-auto">
                   <Settings className="mr-2 h-4 w-4" />
                   配置
                 </Button>
-              </Link>
+              </Link> */}
+              <Button
+                onClick={hundleDelete}
+                variant="outline"
+                className="w-full md:w-auto"
+              >
+                <Trash className="mr-2 h-4 w-4" />
+                删除项目
+              </Button>
             </div>
 
             {/* 配置信息卡片 */}

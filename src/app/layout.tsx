@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SessionProvider } from "@/components/providers";
 import "./globals.css";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "RepoLingo - 一站式 GitHub 仓库多语言翻译平台",
@@ -16,6 +17,7 @@ export default function RootLayout({
     <html lang="zh-CN">
       <body className="min-h-screen flex flex-col">
         <SessionProvider>{children}</SessionProvider>
+        <Toaster position="top-center" richColors />
       </body>
     </html>
   );
