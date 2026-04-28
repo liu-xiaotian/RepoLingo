@@ -159,6 +159,9 @@ export default function SettingsPage() {
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
+      await fetch("/api/auth/signout", {
+        method: "POST",
+      });
       await signOut({ callbackUrl: "/" });
     } catch (error) {
       console.error("Logout error:", error);
