@@ -1,35 +1,293 @@
-This is a Next.js application for managing repository translation workflows.
+### 1.2 项目定位
 
-## Database
+一站式 GitHub 仓库多语言翻译 SaaS 平台，帮助开源项目作者将文档自动翻译成多种语言，扩大国际影响力。
 
-The project now targets PostgreSQL through Prisma.
+### 1.3 目标用户
 
-- Update `DATABASE_URL` and `DIRECT_URL` in your local `.env` to PostgreSQL connection strings.
-- The checked-in Prisma migrations are PostgreSQL migrations.
-- If you are moving existing data from MySQL, follow [docs/mysql-to-postgres.md](docs/mysql-to-postgres.md).
+- 开源项目维护者
+- 技术博客/教程作者
+- 希望让项目国际化的开发者
+- 中文项目出海需求者
 
-## Getting Started
+### 1.4 核心价值主张
 
-Install dependencies, generate Prisma Client, and start the dev server:
+> **"零配置，一键翻译，让你的 GitHub 项目走向全球"**
 
-```bash
-npx prisma generate
-npm run dev
+相比现有方案（如 Azure/co-op-translator），本项目的独特价值：
+
+- ✅ **即开即用** - 无需配置 GitHub Actions、无需本地环境
+- ✅ **SaaS 服务** - 提供现成的网页服务，在线操作
+- ✅ **多模型支持** - 通过 OpenRouter 统一接入多种 AI 模型
+- ✅ **智能同步** - 自动检测 GitHub 提交变更，增量翻译
+- ✅ **可视化配置** - 通过界面选择翻译范围，无需手写配置文件
+
+---
+
+## 2. 产品形态
+
+### 2.1 主要形态
+
+**在线平台 / SaaS 服务**
+
+### 2.2 服务模式
+
+| 模式             | 说明                                                       |
+| ---------------- | ---------------------------------------------------------- |
+| **托管模式**     | 平台提供 AI 翻译服务，用户直接使用（可能收费或有配额限制） |
+| **自带密钥模式** | 用户配置自己的 OpenRouter API Key，平台仅提供翻译流程      |
+
+### 2.3 访问方式
+
+- Web 网页应用
+- 可考虑后续支持 GitHub App 集成
+
+---
+
+## 3. 功能需求
+
+### 3.1 MVP 核心功能清单
+
+#### 3.1.1 用户认证模块
+
+| 功能              | 优先级 | 说明                                    |
+| ----------------- | ------ | --------------------------------------- |
+| GitHub OAuth 登录 | P0     | 使用 GitHub 账号登录，获取仓库访问权限  |
+| 用户配置管理      | P0     | 管理 OpenRouter API Key、默认语言设置等 |
+
+#### 3.1.2 仓库管理模块
+
+| 功能             | 优先级 | 说明                                |
+| ---------------- | ------ | ----------------------------------- |
+| 导入 GitHub 仓库 | P0     | 输入仓库 URL 或从列表选择，导入仓库 |
+| 仓库列表展示     | P0     | 展示已导入的仓库及翻译状态          |
+| 仓库配置         | P0     | 配置基准语言、目标语言、翻译范围等  |
+
+#### 3.1.3 翻译配置模块
+
+| 功能         | 优先级 | 说明                                      |
+| ------------ | ------ | ----------------------------------------- |
+| 语言选择     | P0     | 从预设语言列表中选择目标翻译语言          |
+| 翻译范围选择 | P0     | 可视化选择要翻译的目录/文件               |
+| 忽略规则配置 | P1     | 支持 `.github-global-ignore` 文件配置     |
+| AI 模型选择  | P1     | 选择用于翻译的 AI 模型（通过 OpenRouter） |
+
+#### 3.1.4 翻译执行模块
+
+| 功能         | 优先级 | 说明                          |
+| ------------ | ------ | ----------------------------- |
+| 手动触发翻译 | P0     | 用户点击按钮触发全量/增量翻译 |
+| 翻译进度展示 | P0     | 实时展示翻译进度和状态        |
+| 翻译结果预览 | P0     | 预览翻译后的文件内容          |
+| 提交到仓库   | P0     | 将翻译结果提交到 GitHub 仓库  |
+
+#### 3.1.5 变更检测与同步模块
+
+| 功能             | 优先级 | 说明                                               |
+| ---------------- | ------ | -------------------------------------------------- |
+| Commits 变更检测 | P0     | 通过 GitHub API 获取最新提交，检测基准语言文件变更 |
+| 增量翻译         | P0     | 仅翻译发生变更的文件，节省时间和成本               |
+| 自动同步（可选） | P2     | 通过 Webhook 监听仓库变更，自动触发翻译            |
+
+#### 3.1.6 README 智能处理模块
+
+| 功能           | 优先级 | 说明                                          |
+| -------------- | ------ | --------------------------------------------- |
+| 多语言链接生成 | P0     | 自动在 README 中插入多语言版本切换链接        |
+| 智能位置识别   | P0     | AI 分析 README 结构，找到最合适的链接插入位置 |
+
+---
+
+### 3.2 功能详细说明
+
+#### 3.2.1 语言选择
+
+提供标准化的语言列表，防止用户输入无效内容：
+
+| 语言代码 | 语言名称 | 英文名称            |
+| -------- | -------- | ------------------- |
+| en       | 英语     | English             |
+| zh-CN    | 简体中文 | Simplified Chinese  |
+| zh-TW    | 繁体中文 | Traditional Chinese |
+| ja       | 日语     | Japanese            |
+| ko       | 韩语     | Korean              |
+| es       | 西班牙语 | Spanish             |
+| fr       | 法语     | French              |
+| de       | 德语     | German              |
+| pt       | 葡萄牙语 | Portuguese          |
+| ru       | 俄语     | Russian             |
+| ar       | 阿拉伯语 | Arabic              |
+| hi       | 印地语   | Hindi               |
+| it       | 意大利语 | Italian             |
+| nl       | 荷兰语   | Dutch               |
+| pl       | 波兰语   | Polish              |
+| tr       | 土耳其语 | Turkish             |
+| vi       | 越南语   | Vietnamese          |
+| th       | 泰语     | Thai                |
+| id       | 印尼语   | Indonesian          |
+| ms       | 马来语   | Malay               |
+
+#### 3.2.2 翻译范围配置
+
+**可视化配置界面**：
+
+- 展示仓库文件树结构
+- 复选框选择要翻译的目录/文件
+- 支持全选/反选
+- 自动识别 Markdown 文件
+
+**配置文件同步**：
+
+- 可视化选择的结果自动同步到 `.github-global-ignore` 文件
+- 修改配置文件后，界面自动更新
+
+**`.github-global-ignore` 文件格式**：
+
+```gitignore
+# 忽略 node_modules
+node_modules/
+
+# 忽略特定文件
+CHANGELOG.md
+CONTRIBUTING.md
+
+# 忽略特定目录
+docs/internal/
+.vuepress/
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+#### 3.2.3 翻译存储结构
 
-## Learn More
+#### 3.2.4 多语言链接生成
 
-To learn more about Next.js, take a look at the following resources:
+AI 分析 README 文件结构后，在合适位置插入多语言切换链接：
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**生成格式示例**：
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```markdown
+## 🌐 多语言版本 / Translations
 
-## Deploy on Vercel
+[English](./translations/en/README.md) | [日本語](./translations/ja/README.md) | [한국어](./translations/ko/README.md)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**插入位置策略**：
+
+1. 如果有现有的语言切换区域，更新该区域
+2. 如果有项目标题后的介绍区域，在介绍之后插入
+3. 如果有目录（TOC），在目录之前插入
+4. 兜底：在文件开头插入
+
+---
+
+## 4. 核心流程
+
+#### 4.1 翻译执行流程
+
+```
+用户点击"开始翻译"
+        │
+        ▼
+┌───────────────────┐
+│ 1. 获取仓库信息    │ ──► GitHub API: 获取文件列表
+└───────────────────┘
+        │
+        ▼
+┌───────────────────┐
+│ 2. 筛选待翻译文件  │ ──► 根据配置过滤 .md 文件
+└───────────────────┘
+        │
+        ▼
+┌───────────────────┐
+│ 3. 检测变更文件    │ ──► 对比 commits，找出变更文件
+└───────────────────┘
+        │
+        ▼
+┌───────────────────┐
+│ 4. 调用 AI 翻译    │ ──► OpenRouter API: 翻译内容
+└───────────────────┘
+        │
+        ▼
+┌───────────────────┐
+│ 5. 生成翻译文件    │ ──► 保存到 translations/{lang}/
+└───────────────────┘
+        │
+        ▼
+┌───────────────────┐
+│ 6. 更新 README     │ ──► 插入多语言切换链接
+└───────────────────┘
+        │
+        ▼
+┌───────────────────┐
+│ 7. 提交到 GitHub   │ ──► GitHub API: 创建 commit
+└───────────────────┘
+```
+
+#### 4.2 变更检测流程
+
+```
+获取最近 commits
+        │
+        ▼
+┌───────────────────┐
+│ 解析 commit 中的   │
+│ 变更文件列表       │
+└───────────────────┘
+        │
+        ▼
+┌───────────────────┐
+│ 过滤基准语言的     │
+│ Markdown 文件      │
+└───────────────────┘
+        │
+        ▼
+┌───────────────────┐
+│ 检查对应语言版本   │
+│ 是否已翻译         │
+└───────────────────┘
+        │
+        ▼
+┌───────────────────┐
+│ 返回需要翻译的     │
+│ 文件列表           │
+└───────────────────┘
+```
+
+## 5. UI/UX 设计要点
+
+### 5.1 主要页面
+
+| 页面     | 路径               | 功能                         |
+| -------- | ------------------ | ---------------------------- |
+| 首页     | `/`                | 产品介绍、登录入口           |
+| 仪表盘   | `/dashboard`       | 仓库列表、快速操作           |
+| 仓库详情 | `/repo/:id`        | 仓库配置、翻译操作、历史记录 |
+| 翻译配置 | `/repo/:id/config` | 语言选择、范围选择           |
+| 任务详情 | `/task/:id`        | 翻译进度、结果预览           |
+| 设置     | `/settings`        | API Key 配置、账户设置       |
+
+### 5.2 核心交互流程
+
+```
+登录 → 导入仓库 → 配置翻译（语言+范围）→ 开始翻译 → 查看进度 → 预览结果 → 提交到 GitHub
+```
+
+---
+
+## 6. 非功能需求
+
+### 6.1 性能要求
+
+- 支持并发翻译多个文件
+
+### 6.2 安全要求
+
+- GitHub Token 加密存储
+- OpenRouter API Key 加密存储
+- 支持用户删除数据
+
+### 6.3 可用性要求
+
+- 支持翻译任务失败重试
+
+---
